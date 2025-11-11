@@ -29,8 +29,6 @@ public class AccountFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         sessionManager = new SessionManager(requireContext());
-
-        // Ánh xạ các thành phần giao diện
         loggedOutView = view.findViewById(R.id.logged_out_view);
         loggedInView = view.findViewById(R.id.logged_in_view);
         goToLoginButton = view.findViewById(R.id.go_to_login_button);

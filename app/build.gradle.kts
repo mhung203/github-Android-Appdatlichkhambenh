@@ -1,5 +1,15 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
+}
+
+// Đọc tệp local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 // Khối này sẽ ép buộc Gradle sử dụng đúng phiên bản thư viện
@@ -21,6 +31,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Lấy mật khẩu, xóa các dấu ngoặc kép thừa, và tạo biến BuildConfig
+        val dbPassword = (localProperties.getProperty("db.password") ?: "").trim('"')
+        buildConfigField("String", "DB_PASSWORD", "\"$dbPassword\"")
     }
 
     buildTypes {
@@ -32,6 +46,11 @@ android {
             )
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -52,7 +71,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation("mysql:mysql-connector-java:5.1.49") // Vẫn giữ lại ở đây
+    implementation("mysql:mysql-connector-java:5.1.49")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

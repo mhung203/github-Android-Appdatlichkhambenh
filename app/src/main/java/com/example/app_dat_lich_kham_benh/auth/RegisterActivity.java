@@ -72,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        btnSendOtp.setEnabled(false); // Vô hiệu hóa nút trong khi gửi
+        btnSendOtp.setEnabled(false);
         showToast("Đang gửi mã OTP...");
 
         new Thread(() -> {
@@ -87,8 +87,6 @@ public class RegisterActivity extends AppCompatActivity {
                     runOnUiThread(() -> btnSendOtp.setEnabled(true));
                     return;
                 }
-
-                // Lưu hoặc cập nhật người dùng với trạng thái chưa kích hoạt
                 String sql = "INSERT INTO User (name, email, password, otp_code, otp_expiry, is_active) VALUES (?, ?, ?, ?, ?, ?)" +
                              " ON DUPLICATE KEY UPDATE name=?, password=?, otp_code=?, otp_expiry=?, is_active=false";
                 PreparedStatement statement = connection.prepareStatement(sql);
@@ -106,11 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
                 statement.executeUpdate();
                 statement.close();
                 connection.close();
-
-                // Gửi email
                 sendOtpEmail(email, otp);
-
-                // Cập nhật giao diện
                 runOnUiThread(() -> {
                     showToast("Mã OTP đã được gửi đến email của bạn.");
                     otpSection.setVisibility(View.VISIBLE);

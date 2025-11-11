@@ -39,14 +39,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         sessionManager = new SessionManager(getApplicationContext());
-
-        // Ánh xạ
         etEmail = findViewById(R.id.email_edittext);
         etPassword = findViewById(R.id.password_edittext);
         btnLogin = findViewById(R.id.login_button);
         tvGoToRegister = findViewById(R.id.register_textview);
-
-        // Gán sự kiện
         btnLogin.setOnClickListener(v -> handleLogin());
         tvGoToRegister.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
