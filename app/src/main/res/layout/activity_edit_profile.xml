@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/backButton" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="16dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/backButton">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thông tin cá nhân"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- ================= HỌ VÀ TÊN (KHÔNG CHỈNH SỬA) ================= -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Họ"/>
+                    <TextView
+                        android:id="@+id/tvFirstName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tên"/>
+                    <TextView
+                        android:id="@+id/tvLastName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <!-- ================= NGÀY SINH (CÓ CHỈNH SỬA) ================= -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngày sinh"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <!-- Phần hiển thị và chỉnh sửa -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/tvBirthday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+
+                    <EditText
+                        android:id="@+id/etEditBirthday"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nhấn để chọn ngày"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_calendar"
+                        android:drawablePadding="8dp"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+                <!-- Nút hành động cho Ngày sinh -->
+                <ImageButton
+                    android:id="@+id/btnEditBirthday"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_edit"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Sửa ngày sinh"/>
+                <ImageButton
+                    android:id="@+id/btnSaveBirthday"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_save"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Lưu ngày sinh"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- ================= GIỚI TÍNH (CÓ CHỈNH SỬA) ================= -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giới tính"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                    <TextView
+                        android:id="@+id/tvGender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+                    <Spinner
+                        android:id="@+id/spinnerEditGender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+                <ImageButton
+                    android:id="@+id/btnEditGender"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_edit"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Sửa giới tính"/>
+                <ImageButton
+                    android:id="@+id/btnSaveGender"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_save"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Lưu giới tính"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- ================= SỐ ĐIỆN THOẠI (CÓ CHỈNH SỬA) ================= -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số điện thoại"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                    <TextView
+                        android:id="@+id/tvPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+                    <EditText
+                        android:id="@+id/etEditPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+                <ImageButton
+                    android:id="@+id/btnEditPhone"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_edit"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Sửa số điện thoại"/>
+                <ImageButton
+                    android:id="@+id/btnSavePhone"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_save"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Lưu số điện thoại"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- ================= ĐỊA CHỈ (CÓ CHỈNH SỬA) ================= -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Địa chỉ"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                    <TextView
+                        android:id="@+id/tvAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:padding="8dp"/>
+                    <EditText
+                        android:id="@+id/etEditAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPostalAddress"
+                        android:visibility="gone"/>
+                </FrameLayout>
+
+                <ImageButton
+                    android:id="@+id/btnEditAddress"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_edit"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Sửa địa chỉ"/>
+                <ImageButton
+                    android:id="@+id/btnSaveAddress"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_save"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Lưu địa chỉ"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>

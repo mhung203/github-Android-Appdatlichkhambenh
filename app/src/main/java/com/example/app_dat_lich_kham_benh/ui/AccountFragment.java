@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.app_dat_lich_kham_benh.R;
 import com.example.app_dat_lich_kham_benh.auth.LoginActivity;
+import com.example.app_dat_lich_kham_benh.auth.ProfileActivity;
 import com.example.app_dat_lich_kham_benh.util.SessionManager;
 
 public class AccountFragment extends Fragment {
@@ -20,7 +21,7 @@ public class AccountFragment extends Fragment {
     private SessionManager sessionManager;
     private LinearLayout loggedOutView, loggedInView;
     private Button goToLoginButton;
-    private TextView logoutButton;
+    private TextView logoutButton, updateProfileButton;
     private TextView userNameTextView, userEmailTextView;
 
     @Nullable
@@ -29,12 +30,15 @@ public class AccountFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         sessionManager = new SessionManager(requireContext());
+
+        // Ánh xạ các thành phần giao diện
         loggedOutView = view.findViewById(R.id.logged_out_view);
         loggedInView = view.findViewById(R.id.logged_in_view);
         goToLoginButton = view.findViewById(R.id.go_to_login_button);
         logoutButton = view.findViewById(R.id.logout_button);
         userNameTextView = view.findViewById(R.id.account_user_name);
         userEmailTextView = view.findViewById(R.id.account_user_email);
+        updateProfileButton = view.findViewById(R.id.update_profile_button);
 
         // Gán sự kiện
         goToLoginButton.setOnClickListener(v -> {
@@ -43,13 +47,15 @@ public class AccountFragment extends Fragment {
         });
 
         logoutButton.setOnClickListener(v -> {
-            // Xóa phiên đăng nhập
             sessionManager.logoutUser();
-
-            // Yêu cầu MainActivity chuyển về tab Trang chủ
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).switchToHomeTab();
             }
+        });
+
+        updateProfileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            startActivity(intent);
         });
 
         return view;

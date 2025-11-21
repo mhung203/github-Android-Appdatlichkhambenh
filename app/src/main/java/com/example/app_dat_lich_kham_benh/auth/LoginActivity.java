@@ -30,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
     private Button btnLogin;
-    private TextView tvGoToRegister;
+    private TextView tvGoToRegister, tvForgotPassword;
     private SessionManager sessionManager;
 
     @Override
@@ -39,13 +39,19 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         sessionManager = new SessionManager(getApplicationContext());
+
         etEmail = findViewById(R.id.email_edittext);
         etPassword = findViewById(R.id.password_edittext);
         btnLogin = findViewById(R.id.login_button);
         tvGoToRegister = findViewById(R.id.register_textview);
+        tvForgotPassword = findViewById(R.id.forgot_password_textview);
+
         btnLogin.setOnClickListener(v -> handleLogin());
         tvGoToRegister.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
+        tvForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
     }
 
@@ -68,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                String sql = "SELECT userId, name, password, is_active FROM User WHERE email = ?";
+                String sql = "SELECT userId, firstname, lastname, password, role, is_active FROM User WHERE email = ?";
                 PreparedStatement statement = connection.prepareStatement(sql);
                 statement.setString(1, email);
                 ResultSet resultSet = statement.executeQuery();
@@ -78,12 +84,14 @@ public class LoginActivity extends AppCompatActivity {
                     boolean isActive = resultSet.getBoolean("is_active");
 
                     if (!isActive) {
-                        showToast("Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email.");
+                        showToast("Tài khoản của bạn chưa được kích hoạt.");
                     } else if (dbPassword.equals(hashedPassword)) {
-                        // Đăng nhập thành công
                         int userId = resultSet.getInt("userId");
-                        String name = resultSet.getString("name");
-                        sessionManager.createLoginSession(userId, name, email);
+                        String firstName = resultSet.getString("firstname");
+                        String lastName = resultSet.getString("lastname");
+                        String role = resultSet.getString("role");
+
+                        sessionManager.createLoginSession(userId, firstName, lastName, email, role);
 
                         showToast("Đăng nhập thành công!");
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

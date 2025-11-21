@@ -32,9 +32,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Lấy mật khẩu, xóa các dấu ngoặc kép thừa, và tạo biến BuildConfig
-        val dbPassword = (localProperties.getProperty("db.password") ?: "").trim('"')
+        // Lấy mật khẩu và xóa tất cả các dấu ngoặc kép thừa
+        val dbPassword = (localProperties.getProperty("db.password") ?: "").replace("\"", "")
         buildConfigField("String", "DB_PASSWORD", "\"$dbPassword\"")
+
+        val gmailAppPassword = (localProperties.getProperty("gmail.app.password") ?: "").replace("\"", "")
+        buildConfigField("String", "GMAIL_APP_PASSWORD", "\"$gmailAppPassword\"")
     }
 
     buildTypes {

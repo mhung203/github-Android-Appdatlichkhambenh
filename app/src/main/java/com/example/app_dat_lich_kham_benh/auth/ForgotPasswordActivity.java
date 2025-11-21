@@ -4,13 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton; // Thêm import
 import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -33,53 +29,36 @@ import java.util.Random;
 
 import javax.mail.MessagingException;
 
-public class RegisterActivity extends AppCompatActivity {
+public class ForgotPasswordActivity extends AppCompatActivity {
 
-    private static final String TAG = "RegisterActivity";
+    private static final String TAG = "ForgotPasswordActivity";
     private static final String SENDER_EMAIL = "repon.nolua@gmail.com";
     private static final String SENDER_PASSWORD = BuildConfig.GMAIL_APP_PASSWORD;
 
-    private EditText etFirstName, etLastName, etEmail, etPassword, etOtp;
-    private Button btnSendOtp, btnRegister;
-    private TextView tvGoToLogin;
-    private LinearLayout otpSection;
-    private ImageButton backButton; // Thêm nút quay lại
+    private EditText etEmail, etOtp, etNewPassword;
+    private Button btnSendOtp, btnResetPassword;
+    private LinearLayout resetPasswordSection;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_forgot_password);
 
-        // Ánh xạ các thành phần giao diện
-        etFirstName = findViewById(R.id.firstname_edittext);
-        etLastName = findViewById(R.id.lastname_edittext);
-        etEmail = findViewById(R.id.email_edittext_register);
-        etPassword = findViewById(R.id.password_edittext_register);
-        etOtp = findViewById(R.id.otp_edittext);
-        btnSendOtp = findViewById(R.id.send_otp_button);
-        btnRegister = findViewById(R.id.register_button);
-        tvGoToLogin = findViewById(R.id.login_textview);
-        otpSection = findViewById(R.id.otp_section);
-        backButton = findViewById(R.id.back_button);
+        etEmail = findViewById(R.id.email_edittext_forgot);
+        etOtp = findViewById(R.id.otp_edittext_forgot);
+        etNewPassword = findViewById(R.id.new_password_edittext);
+        btnSendOtp = findViewById(R.id.send_otp_button_forgot);
+        btnResetPassword = findViewById(R.id.reset_password_button);
+        resetPasswordSection = findViewById(R.id.reset_password_section);
 
-        // Gán sự kiện
         btnSendOtp.setOnClickListener(v -> handleSendOtp());
-        btnRegister.setOnClickListener(v -> handleRegister());
-        tvGoToLogin.setOnClickListener(v -> {
-            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-            finish();
-        });
-        backButton.setOnClickListener(v -> finish()); // Sự kiện cho nút quay lại
+        btnResetPassword.setOnClickListener(v -> handleResetPassword());
     }
 
     private void handleSendOtp() {
-        String firstName = etFirstName.getText().toString().trim();
-        String lastName = etLastName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
-
-        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            showToast("Vui lòng điền đầy đủ thông tin.");
+        if (email.isEmpty()) {
+            showToast("Vui lòng nhập email của bạn.");
             return;
         }
 
@@ -88,10 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                String otp = String.format("%06d", new Random().nextInt(999999));
-                Timestamp otpExpiry = new Timestamp(System.currentTimeMillis() + 5 * 60 * 1000);
-                String hashedPassword = hashPassword(password);
-
                 Connection connection = DatabaseConnector.getConnection();
                 if (connection == null) {
                     showToast("Lỗi kết nối đến cơ sở dữ liệu.");
@@ -99,51 +74,64 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                String sql = "INSERT INTO User (firstname, lastname, email, password, role, otp_code, otp_expiry, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)" +
-                             " ON DUPLICATE KEY UPDATE firstname=?, lastname=?, password=?, otp_code=?, otp_expiry=?, is_active=false";
-                PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setString(1, firstName);
-                statement.setString(2, lastName);
-                statement.setString(3, email);
-                statement.setString(4, hashedPassword);
-                statement.setString(5, "Bệnh nhân");
-                statement.setString(6, otp);
-                statement.setTimestamp(7, otpExpiry);
-                statement.setBoolean(8, false);
-                statement.setString(9, firstName);
-                statement.setString(10, lastName);
-                statement.setString(11, hashedPassword);
-                statement.setString(12, otp);
-                statement.setTimestamp(13, otpExpiry);
+                // Kiểm tra xem email có tồn tại không
+                String checkEmailSql = "SELECT userId FROM User WHERE email = ?";
+                PreparedStatement checkStatement = connection.prepareStatement(checkEmailSql);
+                checkStatement.setString(1, email);
+                ResultSet rs = checkStatement.executeQuery();
 
-                statement.executeUpdate();
-                statement.close();
-                connection.close();
+                if (!rs.next()) {
+                    showToast("Email không tồn tại trong hệ thống.");
+                    runOnUiThread(() -> btnSendOtp.setEnabled(true));
+                    return;
+                }
+
+                String otp = String.format("%06d", new Random().nextInt(999999));
+                Timestamp otpExpiry = new Timestamp(System.currentTimeMillis() + 5 * 60 * 1000); // 5 phút
+
+                String updateOtpSql = "UPDATE User SET otp_code = ?, otp_expiry = ? WHERE email = ?";
+                PreparedStatement updateStatement = connection.prepareStatement(updateOtpSql);
+                updateStatement.setString(1, otp);
+                updateStatement.setTimestamp(2, otpExpiry);
+                updateStatement.setString(3, email);
+                updateStatement.executeUpdate();
 
                 sendOtpEmail(email, otp);
 
                 runOnUiThread(() -> {
                     showToast("Mã OTP đã được gửi đến email của bạn.");
-                    otpSection.setVisibility(View.VISIBLE);
-                    btnSendOtp.setText("Gửi lại mã");
+                    resetPasswordSection.setVisibility(View.VISIBLE);
                     btnSendOtp.setEnabled(true);
                 });
 
-            } catch (Exception e) {
-                Log.e(TAG, "Error during OTP sending: " + e.getMessage());
-                showToast("Đã có lỗi xảy ra. Vui lòng thử lại.");
+                rs.close();
+                checkStatement.close();
+                updateStatement.close();
+                connection.close();
+
+            } catch (MessagingException e) {
+                Log.e(TAG, "MessagingException: " + e.getMessage());
+                showToast("Lỗi gửi email.");
                 runOnUiThread(() -> btnSendOtp.setEnabled(true));
-                e.printStackTrace();
+            } catch (SQLException e) {
+                Log.e(TAG, "SQLException: " + e.getMessage());
+                showToast("Lỗi cơ sở dữ liệu.");
+                runOnUiThread(() -> btnSendOtp.setEnabled(true));
+            } catch (Exception e) {
+                Log.e(TAG, "Exception: " + e.getMessage());
+                showToast("Đã có lỗi xảy ra.");
+                runOnUiThread(() -> btnSendOtp.setEnabled(true));
             }
         }).start();
     }
 
-    private void handleRegister() {
+    private void handleResetPassword() {
         String email = etEmail.getText().toString().trim();
         String otp = etOtp.getText().toString().trim();
+        String newPassword = etNewPassword.getText().toString().trim();
 
-        if (otp.length() != 6) {
-            showToast("Mã OTP phải có 6 chữ số.");
+        if (otp.length() != 6 || newPassword.isEmpty()) {
+            showToast("Vui lòng nhập mã OTP và mật khẩu mới.");
             return;
         }
 
@@ -155,7 +143,7 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                String sql = "SELECT otp_code, otp_expiry FROM User WHERE email = ? AND is_active = false";
+                String sql = "SELECT otp_code, otp_expiry FROM User WHERE email = ?";
                 PreparedStatement statement = connection.prepareStatement(sql);
                 statement.setString(1, email);
                 ResultSet resultSet = statement.executeQuery();
@@ -166,21 +154,24 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (dbOtp != null && dbOtp.equals(otp)) {
                         if (dbOtpExpiry.after(new Timestamp(System.currentTimeMillis()))) {
-                            String updateSql = "UPDATE User SET is_active = true, otp_code = NULL, otp_expiry = NULL WHERE email = ?";
+                            String hashedPassword = hashPassword(newPassword);
+                            String updateSql = "UPDATE User SET password = ?, otp_code = NULL, otp_expiry = NULL WHERE email = ?";
                             PreparedStatement updateStatement = connection.prepareStatement(updateSql);
-                            updateStatement.setString(1, email);
+                            updateStatement.setString(1, hashedPassword);
+                            updateStatement.setString(2, email);
+                            
                             int rowsAffected = updateStatement.executeUpdate();
-                            updateStatement.close();
 
                             if (rowsAffected > 0) {
-                                showToast("Đăng ký thành công! Vui lòng đăng nhập.");
-                                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                showToast("Đặt lại mật khẩu thành công! Vui lòng đăng nhập.");
+                                Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                showToast("Lỗi kích hoạt tài khoản.");
+                                showToast("Lỗi cập nhật mật khẩu.");
                             }
+                            updateStatement.close();
                         } else {
                             showToast("Mã OTP đã hết hạn.");
                         }
@@ -188,25 +179,27 @@ public class RegisterActivity extends AppCompatActivity {
                         showToast("Mã OTP không chính xác.");
                     }
                 } else {
-                    showToast("Email không hợp lệ hoặc chưa yêu cầu mã OTP.");
+                    showToast("Email không hợp lệ.");
                 }
 
                 resultSet.close();
                 statement.close();
                 connection.close();
 
+            } catch (SQLException e) {
+                Log.e(TAG, "SQLException: " + e.getMessage());
+                showToast("Lỗi cơ sở dữ liệu.");
             } catch (Exception e) {
-                Log.e(TAG, "Error during registration: " + e.getMessage());
+                Log.e(TAG, "Exception: " + e.getMessage());
                 showToast("Đã có lỗi xảy ra.");
-                e.printStackTrace();
             }
         }).start();
     }
 
     private void sendOtpEmail(String recipientEmail, String otp) throws MessagingException {
         GMailSender sender = new GMailSender(SENDER_EMAIL, SENDER_PASSWORD);
-        sender.sendMail("Mã xác thực OTP của bạn",
-                "Mã OTP của bạn là: " + otp + "\n\nMã này sẽ hết hạn trong 5 phút.",
+        sender.sendMail("Mã khôi phục mật khẩu của bạn",
+                "Mã OTP để đặt lại mật khẩu của bạn là: " + otp,
                 recipientEmail);
     }
 
@@ -221,6 +214,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void showToast(String message) {
-        runOnUiThread(() -> Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_LONG).show());
+        runOnUiThread(() -> Toast.makeText(ForgotPasswordActivity.this, message, Toast.LENGTH_LONG).show());
     }
 }

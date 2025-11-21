@@ -22,8 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navListener);
-
-        // Hiển thị HomeFragment làm màn hình mặc định
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new HomeFragment()).commit();
@@ -41,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new AccountFragment();
             } else {
-                // Xử lý các mục menu khác ở đây
-                // Ví dụ: selectedFragment = new DoctorsFragment();
             }
 
             if (selectedFragment != null) {
@@ -53,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     };
-
-    // Hàm này sẽ được gọi từ AccountFragment
     public void switchToHomeTab() {
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
     }
