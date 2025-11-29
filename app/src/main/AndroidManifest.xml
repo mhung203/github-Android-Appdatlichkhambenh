@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,9 +27,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".auth.LoginActivity"
-            android:exported="false" />
-        <activity
             android:name=".auth.RegisterActivity"
             android:exported="false" />
         <activity
@@ -34,6 +34,18 @@
             android:exported="false" />
         <activity
             android:name=".auth.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.doctor.DoctorDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageDoctorsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.AddEditDoctorActivity"
             android:exported="false" />
     </application>
 

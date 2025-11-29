@@ -6,7 +6,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnector {
-    // Thêm các tham số để hỗ trợ tiếng Việt (UTF-8)
     private static final String URL = "jdbc:mysql://mysql-dee55b2-appdatlichkhambenh1.l.aivencloud.com:22586/appkhambenh?useUnicode=true&characterEncoding=UTF-8&ssl-mode=REQUIRED";
     
     private static final String USER = "avnadmin";

@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.app_dat_lich_kham_benh.R;
 import com.example.app_dat_lich_kham_benh.data.DatabaseConnector;
 import com.example.app_dat_lich_kham_benh.ui.MainActivity;
+import com.example.app_dat_lich_kham_benh.ui.admin.AdminDashboardActivity;
+import com.example.app_dat_lich_kham_benh.ui.doctor.DoctorDashboardActivity;
 import com.example.app_dat_lich_kham_benh.util.SessionManager;
 
 import java.nio.charset.StandardCharsets;
@@ -94,7 +96,16 @@ public class LoginActivity extends AppCompatActivity {
                         sessionManager.createLoginSession(userId, firstName, lastName, email, role);
 
                         showToast("Đăng nhập thành công!");
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        
+                        Intent intent;
+                        if ("admin".equalsIgnoreCase(role)) {
+                            intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                        } else if ("doctor".equalsIgnoreCase(role)) {
+                            intent = new Intent(LoginActivity.this, DoctorDashboardActivity.class);
+                        } else {
+                            intent = new Intent(LoginActivity.this, MainActivity.class);
+                        }
+
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                         finish();
