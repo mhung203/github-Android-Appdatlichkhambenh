@@ -12,19 +12,18 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.app_dat_lich_kham_benh.R;
-import com.example.app_dat_lich_kham_benh.data.DatabaseConnector;
+import com.example.app_dat_lich_kham_benh.api.ApiClient;
+import com.example.app_dat_lich_kham_benh.api.dto.LoginRequestDTO;
+import com.example.app_dat_lich_kham_benh.api.model.User;
+import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.example.app_dat_lich_kham_benh.ui.MainActivity;
 import com.example.app_dat_lich_kham_benh.ui.admin.AdminDashboardActivity;
 import com.example.app_dat_lich_kham_benh.ui.doctor.DoctorDashboardActivity;
 import com.example.app_dat_lich_kham_benh.util.SessionManager;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -34,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private TextView tvGoToRegister, tvForgotPassword;
     private SessionManager sessionManager;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         sessionManager = new SessionManager(getApplicationContext());
+        apiService = ApiClient.getApiService();
 
         etEmail = findViewById(R.id.email_edittext);
         etPassword = findViewById(R.id.password_edittext);
@@ -66,78 +67,51 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        new Thread(() -> {
-            try {
-                String hashedPassword = hashPassword(password);
-                Connection connection = DatabaseConnector.getConnection();
+        LoginRequestDTO loginRequest = new LoginRequestDTO(email, password);
 
-                if (connection == null) {
-                    showToast("Lỗi kết nối đến cơ sở dữ liệu.");
-                    return;
-                }
+        apiService.login(loginRequest).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    User user = response.body();
+                    
+                    // --- DÒNG LOG CHẨN ĐOÁN --- 
+                    Log.d(TAG, "Đăng nhập thành công. Vai trò nhận được từ server: '" + user.getRole() + "'");
 
-                String sql = "SELECT userId, firstname, lastname, password, role, is_active FROM User WHERE email = ?";
-                PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setString(1, email);
-                ResultSet resultSet = statement.executeQuery();
+                    sessionManager.createLoginSession(user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getRole());
 
-                if (resultSet.next()) {
-                    String dbPassword = resultSet.getString("password");
-                    boolean isActive = resultSet.getBoolean("is_active");
+                    showToast("Đăng nhập thành công!");
 
-                    if (!isActive) {
-                        showToast("Tài khoản của bạn chưa được kích hoạt.");
-                    } else if (dbPassword.equals(hashedPassword)) {
-                        int userId = resultSet.getInt("userId");
-                        String firstName = resultSet.getString("firstname");
-                        String lastName = resultSet.getString("lastname");
-                        String role = resultSet.getString("role");
-
-                        sessionManager.createLoginSession(userId, firstName, lastName, email, role);
-
-                        showToast("Đăng nhập thành công!");
-                        
-                        Intent intent;
-                        if ("admin".equalsIgnoreCase(role)) {
-                            intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
-                        } else if ("doctor".equalsIgnoreCase(role)) {
-                            intent = new Intent(LoginActivity.this, DoctorDashboardActivity.class);
-                        } else {
-                            intent = new Intent(LoginActivity.this, MainActivity.class);
-                        }
-
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
+                    Intent intent;
+                    if ("admin".equalsIgnoreCase(user.getRole())) {
+                        intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                    } else if ("doctor".equalsIgnoreCase(user.getRole())) {
+                        intent = new Intent(LoginActivity.this, DoctorDashboardActivity.class);
                     } else {
-                        showToast("Sai mật khẩu. Vui lòng thử lại.");
+                        intent = new Intent(LoginActivity.this, MainActivity.class);
                     }
+
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+
                 } else {
-                    showToast("Tài khoản không tồn tại.");
+                    String errorMessage = "Sai thông tin đăng nhập.";
+                     if (response.code() == 401) { // Unauthorized
+                        errorMessage = "Sai mật khẩu. Vui lòng thử lại.";
+                    } else if (response.code() == 404) { // Not Found
+                        errorMessage = "Tài khoản không tồn tại.";
+                    }
+                    showToast(errorMessage);
                 }
-
-                resultSet.close();
-                statement.close();
-                connection.close();
-
-            } catch (SQLException e) {
-                Log.e(TAG, "SQLException: " + e.getMessage());
-                showToast("Lỗi cơ sở dữ liệu: " + e.getMessage());
-            } catch (Exception e) {
-                Log.e(TAG, "Exception: " + e.getMessage());
-                showToast("Đã có lỗi xảy ra.");
             }
-        }).start();
-    }
 
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashedBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.e(TAG, "Login failed: " + t.getMessage());
+                showToast("Lỗi kết nối. Vui lòng thử lại.");
+            }
+        });
     }
 
     private void showToast(String message) {

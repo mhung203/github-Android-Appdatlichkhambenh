@@ -12,17 +12,19 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.app_dat_lich_kham_benh.R;
-import com.example.app_dat_lich_kham_benh.data.DatabaseConnector;
+import com.example.app_dat_lich_kham_benh.api.ApiClient;
+import com.example.app_dat_lich_kham_benh.api.model.BacSi;
+import com.example.app_dat_lich_kham_benh.api.model.Khoa;
+import com.example.app_dat_lich_kham_benh.api.model.User;
+import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddEditDoctorActivity extends AppCompatActivity {
 
@@ -34,11 +36,15 @@ public class AddEditDoctorActivity extends AppCompatActivity {
 
     private boolean isEditMode = false;
     private int doctorIdToEdit = -1;
+    private ApiService apiService;
+    private List<Khoa> khoaList = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_doctor);
+
+        apiService = ApiClient.getApiService();
 
         etFirstName = findViewById(R.id.et_doctor_firstname);
         etLastName = findViewById(R.id.et_doctor_lastname);
@@ -46,29 +52,17 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_doctor_password);
         actvSpecialty = findViewById(R.id.actv_doctor_specialty);
         btnSave = findViewById(R.id.btn_save_doctor);
-
-        // Setup the dropdown menu
-        String[] specialties = new String[]{"Tim mạch", "Da liễu", "Hô hấp"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                specialties
-        );
-        actvSpecialty.setAdapter(adapter);
+        loadKhoaData();
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("DOCTOR_ID")) {
             isEditMode = true;
             doctorIdToEdit = intent.getIntExtra("DOCTOR_ID", -1);
-
             setTitle("Chỉnh sửa Bác sĩ");
-            etFirstName.setText(intent.getStringExtra("DOCTOR_FIRST_NAME"));
-            etLastName.setText(intent.getStringExtra("DOCTOR_LAST_NAME"));
-            etEmail.setText(intent.getStringExtra("DOCTOR_EMAIL"));
-            actvSpecialty.setText(intent.getStringExtra("DOCTOR_SPECIALTY"), false);
-
-            etPassword.setHint("Để trống nếu không đổi mật khẩu");
             btnSave.setText("Cập nhật thông tin");
+            etPassword.setHint("Để trống nếu không đổi mật khẩu");
+
+            loadDoctorDetails(doctorIdToEdit);
         } else {
             setTitle("Thêm Bác sĩ mới");
         }
@@ -76,166 +70,158 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> saveDoctor());
     }
 
+    private void loadKhoaData() {
+        apiService.getAllKhoa().enqueue(new Callback<List<Khoa>>() {
+            @Override
+            public void onResponse(Call<List<Khoa>> call, Response<List<Khoa>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    khoaList.clear();
+                    khoaList.addAll(response.body());
+
+                    List<String> specialtyNames = new ArrayList<>();
+                    for (Khoa khoa : khoaList) {
+                        specialtyNames.add(khoa.getTenKhoa());
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            AddEditDoctorActivity.this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            specialtyNames
+                    );
+                    actvSpecialty.setAdapter(adapter);
+
+                } else {
+                    Log.e(TAG, "Tải danh sách chuyên khoa thất bại. Mã lỗi: " + response.code());
+                    showToast("Không thể tải danh sách chuyên khoa.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Khoa>> call, Throwable t) {
+                Log.e(TAG, "Failed to load specialties: " + t.getMessage());
+                showToast("Lỗi kết nối khi tải chuyên khoa.");
+            }
+        });
+    }
+
+    private void loadDoctorDetails(int doctorId) {
+        apiService.getBacSiById(doctorId).enqueue(new Callback<BacSi>() {
+            @Override
+            public void onResponse(Call<BacSi> call, Response<BacSi> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BacSi doctor = response.body();
+                    if (doctor.getUser() != null) {
+                        etFirstName.setText(doctor.getUser().getFirstname());
+                        etLastName.setText(doctor.getUser().getLastname());
+                        etEmail.setText(doctor.getUser().getEmail());
+                    }
+                    if (doctor.getKhoa() != null) {
+                        actvSpecialty.setText(doctor.getKhoa().getTenKhoa(), false);
+                    }
+                } else {
+                    showToast("Không thể tải thông tin bác sĩ.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BacSi> call, Throwable t) {
+                showToast("Lỗi kết nối.");
+            }
+        });
+    }
+
     private void saveDoctor() {
         String firstName = etFirstName.getText().toString().trim();
         String lastName = etLastName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
-        String specialty = actvSpecialty.getText().toString().trim();
+        String specialtyName = actvSpecialty.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || specialty.isEmpty()) {
-            showToast("Vui lòng nhập đầy đủ thông tin (trừ mật khẩu khi sửa).");
-            return;
-        }
-        if (!isEditMode && password.isEmpty()) {
-            showToast("Vui lòng nhập mật khẩu cho tài khoản mới.");
+        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || specialtyName.isEmpty()) {
+            showToast("Vui lòng nhập đầy đủ thông tin.");
             return;
         }
 
-        new Thread(() -> {
-            if (isEditMode) {
-                updateDoctorInDb(firstName, lastName, email, password, specialty);
-            } else {
-                insertDoctorInDb(firstName, lastName, email, password, specialty);
-            }
-        }).start();
-    }
+        final Khoa selectedKhoa = khoaList.stream()
+                .filter(k -> k.getTenKhoa().equals(specialtyName))
+                .findFirst()
+                .orElse(null);
 
-    private void insertDoctorInDb(String firstName, String lastName, String email, String password, String chuyenMon) {
-        Connection connection = null;
-        try {
-            connection = DatabaseConnector.getConnection();
-            if (connection == null) {
-                showToast("Lỗi kết nối cơ sở dữ liệu.");
+        if (selectedKhoa == null) {
+            showToast("Chuyên khoa không hợp lệ. Vui lòng chọn từ danh sách.");
+            return;
+        }
+
+        if (isEditMode) {
+            showToast("Chức năng cập nhật chưa được hỗ trợ.");
+        } else {
+            if (password.isEmpty()) {
+                showToast("Vui lòng nhập mật khẩu cho tài khoản mới.");
                 return;
             }
 
-            connection.setAutoCommit(false);
+            // Step 1: Create the User object
+            User newUserAccount = new User();
+            newUserAccount.setFirstname(firstName);
+            newUserAccount.setLastname(lastName);
+            newUserAccount.setEmail(email);
+            newUserAccount.setPassword(password);
+            newUserAccount.setRole("doctor");
 
-            String hashedPassword = hashPassword(password);
-            String userSql = "INSERT INTO User (firstname, lastname, email, password, role, is_active) VALUES (?, ?, ?, ?, 'doctor', 1)";
-            PreparedStatement userStatement = connection.prepareStatement(userSql, Statement.RETURN_GENERATED_KEYS);
-            userStatement.setString(1, firstName);
-            userStatement.setString(2, lastName);
-            userStatement.setString(3, email);
-            userStatement.setString(4, hashedPassword);
+            // Step 2: Call API to create the user first
+            apiService.createUser(newUserAccount).enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        // Step 3: If user creation is successful, create the doctor profile
+                        User createdUser = response.body();
+                        createDoctorProfile(createdUser, selectedKhoa);
+                    } else {
+                        showToast("Tạo tài khoản thất bại. Email có thể đã tồn tại.");
+                        Log.e(TAG, "User creation failed. Code: " + response.code());
+                    }
+                }
 
-            if (userStatement.executeUpdate() == 0) {
-                throw new SQLException("Tạo user thất bại.");
-            }
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    Log.e(TAG, "User creation API failure: " + t.getMessage());
+                    showToast("Lỗi kết nối khi tạo tài khoản.");
+                }
+            });
+        }
+    }
 
-            int newUserId;
-            try (ResultSet generatedKeys = userStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    newUserId = generatedKeys.getInt(1);
+    private void createDoctorProfile(User createdUser, Khoa selectedKhoa) {
+        // Link user and khoa by their IDs
+        User userToLink = new User();
+        userToLink.setUserId(createdUser.getUserId());
+
+        Khoa khoaToLink = new Khoa();
+        khoaToLink.setKhoaId(selectedKhoa.getKhoaId());
+
+        BacSi newDoctor = new BacSi();
+        newDoctor.setUser(userToLink);
+        newDoctor.setKhoa(khoaToLink);
+
+        // Step 4: Call API to create the doctor profile
+        apiService.createBacSi(newDoctor).enqueue(new Callback<BacSi>() {
+            @Override
+            public void onResponse(Call<BacSi> call, Response<BacSi> response) {
+                if (response.isSuccessful()) {
+                    showToast("Thêm bác sĩ thành công!");
+                    finish(); // Go back to the doctor list
                 } else {
-                    throw new SQLException("Tạo user thất bại, không lấy được ID.");
+                    showToast("Tạo hồ sơ bác sĩ thất bại.");
+                    Log.e(TAG, "Doctor profile creation failed. Code: " + response.code());
                 }
             }
-            userStatement.close();
 
-            String doctorSql = "INSERT INTO BacSi (userId, chuyenMon) VALUES (?, ?)";
-            PreparedStatement doctorStatement = connection.prepareStatement(doctorSql);
-            doctorStatement.setInt(1, newUserId);
-            doctorStatement.setString(2, chuyenMon);
-
-            if (doctorStatement.executeUpdate() == 0) {
-                throw new SQLException("Tạo chi tiết bác sĩ thất bại.");
+            @Override
+            public void onFailure(Call<BacSi> call, Throwable t) {
+                Log.e(TAG, "Doctor profile creation API failure: " + t.getMessage());
+                showToast("Lỗi kết nối khi tạo hồ sơ bác sĩ.");
             }
-            doctorStatement.close();
-
-            connection.commit();
-            showToast("Thêm bác sĩ thành công!");
-            finish();
-
-        } catch (SQLException e) {
-            if (connection != null) try { connection.rollback(); } catch (SQLException ex) { Log.e(TAG, "Rollback thất bại: " + ex.getMessage()); }
-            handleSqlException(e);
-        } catch (Exception e) {
-            if (connection != null) try { connection.rollback(); } catch (SQLException ex) { Log.e(TAG, "Rollback thất bại: " + ex.getMessage()); }
-            handleGenericException(e);
-        } finally {
-            if (connection != null) try { connection.setAutoCommit(true); connection.close(); } catch (SQLException e) { Log.e(TAG, "Đóng kết nối thất bại: " + e.getMessage()); }
-        }
-    }
-
-    private void updateDoctorInDb(String firstName, String lastName, String email, String password, String chuyenMon) {
-        Connection connection = null;
-        try {
-            connection = DatabaseConnector.getConnection();
-            if (connection == null) {
-                showToast("Lỗi kết nối cơ sở dữ liệu.");
-                return;
-            }
-            connection.setAutoCommit(false);
-
-            // Update User table
-            PreparedStatement userStatement;
-            if (password.isEmpty()) {
-                String sql = "UPDATE User SET firstname = ?, lastname = ?, email = ? WHERE userId = ?";
-                userStatement = connection.prepareStatement(sql);
-                userStatement.setString(1, firstName);
-                userStatement.setString(2, lastName);
-                userStatement.setString(3, email);
-                userStatement.setInt(4, doctorIdToEdit);
-            } else {
-                String hashedPassword = hashPassword(password);
-                String sql = "UPDATE User SET firstname = ?, lastname = ?, email = ?, password = ? WHERE userId = ?";
-                userStatement = connection.prepareStatement(sql);
-                userStatement.setString(1, firstName);
-                userStatement.setString(2, lastName);
-                userStatement.setString(3, email);
-                userStatement.setString(4, hashedPassword);
-                userStatement.setInt(5, doctorIdToEdit);
-            }
-            userStatement.executeUpdate();
-            userStatement.close();
-
-            // Update bacSi table
-            String doctorSql = "UPDATE BacSi SET chuyenMon = ? WHERE userId = ?";
-            PreparedStatement doctorStatement = connection.prepareStatement(doctorSql);
-            doctorStatement.setString(1, chuyenMon);
-            doctorStatement.setInt(2, doctorIdToEdit);
-            doctorStatement.executeUpdate();
-            doctorStatement.close();
-
-            connection.commit();
-            showToast("Cập nhật thành công!");
-            finish();
-
-        } catch (SQLException e) {
-            if (connection != null) try { connection.rollback(); } catch (SQLException ex) { Log.e(TAG, "Rollback thất bại: " + ex.getMessage()); }
-            handleSqlException(e);
-        } catch (Exception e) {
-            if (connection != null) try { connection.rollback(); } catch (SQLException ex) { Log.e(TAG, "Rollback thất bại: " + ex.getMessage()); }
-            handleGenericException(e);
-        } finally {
-            if (connection != null) try { connection.setAutoCommit(true); connection.close(); } catch (SQLException e) { Log.e(TAG, "Đóng kết nối thất bại: " + e.getMessage()); }
-        }
-    }
-
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-512");
-        byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : hashedBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
-
-    private void handleSqlException(SQLException e) {
-        Log.e(TAG, "SQLException: " + e.getMessage());
-        if (e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
-            showToast("Email này đã được sử dụng.");
-        } else {
-            showToast("Lỗi cơ sở dữ liệu: " + e.getMessage());
-        }
-    }
-
-    private void handleGenericException(Exception e) {
-        Log.e(TAG, "Exception: " + e.getMessage());
-        showToast("Đã có lỗi xảy ra.");
+        });
     }
 
     private void showToast(String message) {

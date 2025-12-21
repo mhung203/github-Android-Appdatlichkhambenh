@@ -13,16 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.app_dat_lich_kham_benh.R;
 import com.example.app_dat_lich_kham_benh.adapter.DoctorAdapter;
-import com.example.app_dat_lich_kham_benh.data.DatabaseConnector;
+import com.example.app_dat_lich_kham_benh.api.ApiClient;
+import com.example.app_dat_lich_kham_benh.api.model.BacSi;
+import com.example.app_dat_lich_kham_benh.api.model.User;
+import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.example.app_dat_lich_kham_benh.model.Doctor;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAdapter.OnItemClickListener {
 
@@ -32,12 +35,14 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
     private FloatingActionButton fabAddDoctor;
     private DoctorAdapter doctorAdapter;
     private List<Doctor> doctorList = new ArrayList<>();
+    private ApiService apiService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_doctors);
 
+        apiService = ApiClient.getApiService();
         recyclerViewDoctors = findViewById(R.id.recycler_view_doctors);
         fabAddDoctor = findViewById(R.id.fab_add_doctor);
 
@@ -62,53 +67,43 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
     }
 
     private void loadDoctors() {
-        new Thread(() -> {
-            List<Doctor> loadedDoctors = new ArrayList<>();
-            try {
-                Connection connection = DatabaseConnector.getConnection();
-                if (connection == null) {
-                    showToast("Lỗi kết nối đến cơ sở dữ liệu.");
-                    return;
-                }
-
-                String sql = "SELECT u.userId, u.firstname, u.lastname, u.email, b.chuyenMon FROM User u JOIN BacSi b ON u.userId = b.userId WHERE u.role = 'doctor'";
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery();
-
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("userId");
-                    String firstName = resultSet.getString("firstname");
-                    String lastName = resultSet.getString("lastname");
-                    String email = resultSet.getString("email");
-                    String specialty = resultSet.getString("chuyenMon");
-                    loadedDoctors.add(new Doctor(id, firstName, lastName, email, specialty != null ? specialty : "Chưa có"));
-                }
-
-                resultSet.close();
-                statement.close();
-                connection.close();
-
-                runOnUiThread(() -> {
+        apiService.getAllBacSi().enqueue(new Callback<List<BacSi>>() {
+            @Override
+            public void onResponse(Call<List<BacSi>> call, Response<List<BacSi>> response) {
+                if (response.isSuccessful() && response.body() != null) {
                     doctorList.clear();
-                    doctorList.addAll(loadedDoctors);
+                    for (BacSi bacSi : response.body()) {
+                        User user = bacSi.getUser();
+                        if (user != null) {
+                            String specialty = (bacSi.getKhoa() != null) ? bacSi.getKhoa().getTenKhoa() : "Chưa có";
+                            doctorList.add(new Doctor(
+                                    bacSi.getBacSiId(),
+                                    user.getUserId(),
+                                    user.getFirstname(),
+                                    user.getLastname(),
+                                    user.getEmail(),
+                                    specialty
+                            ));
+                        }
+                    }
                     doctorAdapter.notifyDataSetChanged();
-                });
-
-            } catch (SQLException e) {
-                Log.e(TAG, "SQLException: " + e.getMessage());
-                showToast("Lỗi khi tải danh sách bác sĩ.");
+                } else {
+                    showToast("Không thể tải danh sách bác sĩ.");
+                }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<List<BacSi>> call, Throwable t) {
+                Log.e(TAG, "Error loading doctors: " + t.getMessage());
+                showToast("Lỗi kết nối.");
+            }
+        });
     }
 
     @Override
     public void onEditClick(Doctor doctor) {
         Intent intent = new Intent(this, AddEditDoctorActivity.class);
         intent.putExtra("DOCTOR_ID", doctor.getId());
-        intent.putExtra("DOCTOR_FIRST_NAME", doctor.getFirstName());
-        intent.putExtra("DOCTOR_LAST_NAME", doctor.getLastName());
-        intent.putExtra("DOCTOR_EMAIL", doctor.getEmail());
-        intent.putExtra("DOCTOR_SPECIALTY", doctor.getSpecialty());
         startActivity(intent);
     }
 
@@ -117,65 +112,29 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận Xóa")
                 .setMessage("Bạn có chắc chắn muốn xóa bác sĩ '" + doctor.getFullName() + "'? Hành động này không thể hoàn tác.")
-                .setPositiveButton("Xóa", (dialog, which) -> deleteDoctorFromDb(doctor.getId()))
+                .setPositiveButton("Xóa", (dialog, which) -> deleteDoctor(doctor.getUserId()))
                 .setNegativeButton("Hủy", null)
                 .show();
     }
 
-    private void deleteDoctorFromDb(int doctorId) {
-        Connection connection = null;
-        new Thread(() -> {
-            try {
-                Connection conn = DatabaseConnector.getConnection();
-                if (conn == null) {
-                    showToast("Lỗi kết nối cơ sở dữ liệu.");
-                    return;
-                }
-                conn.setAutoCommit(false);
-
-                // Delete from child table first
-                String deleteBacSiSql = "DELETE FROM BacSi WHERE userId = ?";
-                PreparedStatement bacSiStatement = conn.prepareStatement(deleteBacSiSql);
-                bacSiStatement.setInt(1, doctorId);
-                bacSiStatement.executeUpdate();
-                bacSiStatement.close();
-
-                // Then delete from parent table
-                String deleteUserSql = "DELETE FROM User WHERE userId = ?";
-                PreparedStatement userStatement = conn.prepareStatement(deleteUserSql);
-                userStatement.setInt(1, doctorId);
-                int rowsAffected = userStatement.executeUpdate();
-                userStatement.close();
-                
-                conn.commit();
-
-                if (rowsAffected > 0) {
+    private void deleteDoctor(int userId) {
+        apiService.deleteUser(userId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
                     showToast("Xóa bác sĩ thành công!");
-                    loadDoctors(); // Reload the list
+                    loadDoctors(); // Tải lại danh sách
                 } else {
-                    showToast("Xóa bác sĩ thất bại (không tìm thấy user).");
-                }
-
-            } catch (SQLException e) {
-                Log.e(TAG, "SQLException: " + e.getMessage());
-                showToast("Lỗi cơ sở dữ liệu khi xóa.");
-                // Rollback in case of error
-                try {
-                    if(DatabaseConnector.getConnection() != null) DatabaseConnector.getConnection().rollback();
-                } catch (SQLException ex) {
-                    Log.e(TAG, "Rollback failed: " + ex.getMessage());
-                }
-            } finally {
-                 try {
-                    if(DatabaseConnector.getConnection() != null) {
-                        DatabaseConnector.getConnection().setAutoCommit(true);
-                        DatabaseConnector.getConnection().close();
-                    }
-                } catch (SQLException e) {
-                    Log.e(TAG, "Failed to close connection: " + e.getMessage());
+                    showToast("Xóa bác sĩ thất bại. Lỗi: " + response.code());
                 }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Error deleting doctor: " + t.getMessage());
+                showToast("Lỗi kết nối khi xóa.");
+            }
+        });
     }
 
     private void showToast(String message) {

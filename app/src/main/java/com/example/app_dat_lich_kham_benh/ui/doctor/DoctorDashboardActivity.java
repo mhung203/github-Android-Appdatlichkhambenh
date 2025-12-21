@@ -9,7 +9,6 @@ public class DoctorDashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // We will create this layout file in the next step
         setContentView(R.layout.activity_doctor_dashboard);
     }
 }

@@ -31,7 +31,6 @@ public class AccountFragment extends Fragment {
 
         sessionManager = new SessionManager(requireContext());
 
-        // Ánh xạ các thành phần giao diện
         loggedOutView = view.findViewById(R.id.logged_out_view);
         loggedInView = view.findViewById(R.id.logged_in_view);
         goToLoginButton = view.findViewById(R.id.go_to_login_button);
@@ -64,7 +63,6 @@ public class AccountFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Cập nhật giao diện mỗi khi Fragment được hiển thị
         updateView();
     }
 
@@ -72,8 +70,6 @@ public class AccountFragment extends Fragment {
         if (sessionManager.isLoggedIn()) {
             loggedInView.setVisibility(View.VISIBLE);
             loggedOutView.setVisibility(View.GONE);
-
-            // Lấy và hiển thị thông tin người dùng
             userNameTextView.setText(sessionManager.getUserName());
             userEmailTextView.setText(sessionManager.getUserEmail());
 

@@ -15,16 +15,18 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.app_dat_lich_kham_benh.R;
-import com.example.app_dat_lich_kham_benh.data.DatabaseConnector;
+import com.example.app_dat_lich_kham_benh.api.ApiClient;
+import com.example.app_dat_lich_kham_benh.api.model.User;
+import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.example.app_dat_lich_kham_benh.util.SessionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -39,6 +41,8 @@ public class ProfileActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private final Calendar myCalendar = Calendar.getInstance();
     private ImageButton backButton;
+    private ApiService apiService;
+    private User currentUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
 
         sessionManager = new SessionManager(this);
+        apiService = ApiClient.getApiService();
 
         // Ánh xạ views
         tvFirstName = findViewById(R.id.tvFirstName);
@@ -128,74 +133,73 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserProfile() {
-        new Thread(() -> {
-            try {
-                Connection connection = DatabaseConnector.getConnection();
-                String sql = "SELECT firstname, lastname, birthday, gender, phone, address FROM User WHERE userId = ?";
-                PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setInt(1, sessionManager.getUserId());
-
-                ResultSet rs = statement.executeQuery();
-                if (rs.next()) {
-                    String firstName = rs.getString("firstname");
-                    String lastName = rs.getString("lastname");
-                    String birthday = rs.getString("birthday");
-                    String gender = rs.getString("gender");
-                    String phone = rs.getString("phone");
-                    String address = rs.getString("address");
-
+        apiService.getUserById(sessionManager.getUserId()).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    currentUser = response.body();
                     runOnUiThread(() -> {
-                        tvFirstName.setText(firstName);
-                        tvLastName.setText(lastName);
-                        tvBirthday.setText(birthday != null ? birthday : "Chưa có");
-                        tvGender.setText(gender != null ? gender : "Chưa có");
-                        tvPhone.setText(phone != null ? phone : "Chưa có");
-                        tvAddress.setText(address != null ? address : "Chưa có");
+                        tvFirstName.setText(currentUser.getFirstname());
+                        tvLastName.setText(currentUser.getLastname());
+                        tvBirthday.setText(currentUser.getBirthday() != null ? currentUser.getBirthday() : "Chưa có");
+                        tvGender.setText(currentUser.getGender() != null ? currentUser.getGender() : "Chưa có");
+                        tvPhone.setText(currentUser.getPhone() != null ? currentUser.getPhone() : "Chưa có");
+                        tvAddress.setText(currentUser.getAddress() != null ? currentUser.getAddress() : "Chưa có");
 
                         // Set initial values for editing
-                        etEditBirthday.setText(birthday);
-                        etEditPhone.setText(phone);
-                        etEditAddress.setText(address);
-                        setSpinnerSelection(spinnerEditGender, gender);
+                        etEditBirthday.setText(currentUser.getBirthday());
+                        etEditPhone.setText(currentUser.getPhone());
+                        etEditAddress.setText(currentUser.getAddress());
+                        setSpinnerSelection(spinnerEditGender, currentUser.getGender());
                     });
+                } else {
+                    showToast("Không thể tải thông tin người dùng.");
                 }
-                rs.close();
-                statement.close();
-                connection.close();
-            } catch (SQLException e) {
-                Log.e(TAG, "Error loading profile: " + e.getMessage());
-                e.printStackTrace();
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.e(TAG, "Error loading profile: " + t.getMessage());
+                showToast("Lỗi kết nối.");
+            }
+        });
     }
 
     private void saveField(String fieldName, String value, TextView displayView) {
-        new Thread(() -> {
-            try {
-                Connection connection = DatabaseConnector.getConnection();
-                String sql = String.format("UPDATE User SET %s = ? WHERE userId = ?", fieldName);
-                PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setString(1, value);
-                statement.setInt(2, sessionManager.getUserId());
+        if (currentUser == null) return;
 
-                int rowsAffected = statement.executeUpdate();
-                runOnUiThread(() -> {
-                    if (rowsAffected > 0) {
-                        showToast("Cập nhật thành công!");
-                        displayView.setText(value);
-                    } else {
-                        showToast("Cập nhật thất bại.");
-                    }
-                });
+        switch (fieldName) {
+            case "birthday":
+                currentUser.setBirthday(value);
+                break;
+            case "gender":
+                currentUser.setGender(value);
+                break;
+            case "phone":
+                currentUser.setPhone(value);
+                break;
+            case "address":
+                currentUser.setAddress(value);
+                break;
+        }
 
-                statement.close();
-                connection.close();
-            } catch (SQLException e) {
-                Log.e(TAG, "Error saving field: " + e.getMessage());
-                e.printStackTrace();
-                showToast("Lỗi cơ sở dữ liệu.");
+        apiService.updateUser(currentUser.getUserId(), currentUser).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    showToast("Cập nhật thành công!");
+                    displayView.setText(value);
+                } else {
+                    showToast("Cập nhật thất bại.");
+                }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.e(TAG, "Error saving field: " + t.getMessage());
+                showToast("Lỗi kết nối.");
+            }
+        });
     }
 
     private void toggleEditMode(View displayView, View editView, View editButton, View saveButton, boolean isEditing) {

@@ -1,0 +1,70 @@
+package com.example.app_dat_lich_kham_benh.api.service;
+
+import com.example.app_dat_lich_kham_benh.api.dto.LoginRequestDTO;
+import com.example.app_dat_lich_kham_benh.api.model.BacSi;
+import com.example.app_dat_lich_kham_benh.api.model.BenhNhan;
+import com.example.app_dat_lich_kham_benh.api.model.Khoa;
+import com.example.app_dat_lich_kham_benh.api.model.User;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+public interface ApiService {
+
+    // User endpoints
+    @POST("api/users/register")
+    Call<User> createUser(@Body User user);
+
+    @POST("api/users/login")
+    Call<User> login(@Body LoginRequestDTO loginRequest);
+
+    @GET("api/users/{id}")
+    Call<User> getUserById(@Path("id") int id);
+
+    @GET("api/users")
+    Call<List<User>> getUsers();
+
+    @PUT("api/users/{id}")
+    Call<User> updateUser(@Path("id") int id, @Body User user);
+
+    @DELETE("api/users/{id}")
+    Call<Void> deleteUser(@Path("id") int id);
+
+    // Khoa endpoints
+    @GET("api/khoa/{id}")
+    Call<Khoa> getKhoaById(@Path("id") int id);
+
+    @GET("api/khoa")
+    Call<List<Khoa>> getAllKhoa();
+
+    @GET("api/khoa/search")
+    Call<List<Khoa>> searchKhoa(@Query("q") String query);
+
+    // BacSi endpoints
+    @GET("api/bac-si/{id}")
+    Call<BacSi> getBacSiById(@Path("id") int id);
+
+    @GET("api/bac-si")
+    Call<List<BacSi>> getAllBacSi();
+
+    @GET("api/bac-si/khoa/{khoaId}")
+    Call<List<BacSi>> getBacSiByKhoa(@Path("khoaId") int khoaId);
+
+    @POST("api/bac-si")
+    Call<BacSi> createBacSi(@Body BacSi bacSi);
+
+    // BenhNhan endpoints
+    @GET("api/benh-nhan/{userId}")
+    Call<BenhNhan> getBenhNhanByUserId(@Path("userId") int userId);
+
+    @POST("api/benh-nhan")
+    Call<BenhNhan> createBenhNhan(@Body BenhNhan benhNhan);
+}
