@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="24dp"
-        android:text="Bảng điều khiển Admin"
+        android:text=" Bảng điều khiển"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -126,6 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Quản lý Bác sĩ" 
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:backgroundTint="#03A9F4"/>
 
 </LinearLayout>

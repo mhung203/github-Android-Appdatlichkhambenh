@@ -1,11 +1,17 @@
 package com.example.app_dat_lich_kham_benh.api.service;
 
+import com.example.app_dat_lich_kham_benh.api.dto.BacSiDTO;
+import com.example.app_dat_lich_kham_benh.api.dto.LichHenDTO;
 import com.example.app_dat_lich_kham_benh.api.dto.LoginRequestDTO;
 import com.example.app_dat_lich_kham_benh.api.model.BacSi;
 import com.example.app_dat_lich_kham_benh.api.model.BenhNhan;
+import com.example.app_dat_lich_kham_benh.api.model.CaKham;
 import com.example.app_dat_lich_kham_benh.api.model.Khoa;
+import com.example.app_dat_lich_kham_benh.api.model.LichHen;
+import com.example.app_dat_lich_kham_benh.api.model.PhongKham;
 import com.example.app_dat_lich_kham_benh.api.model.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import retrofit2.Call;
@@ -52,6 +58,9 @@ public interface ApiService {
     @GET("api/bac-si/{id}")
     Call<BacSi> getBacSiById(@Path("id") int id);
 
+    @GET("api/bac-si/user/{userId}")
+    Call<BacSi> getBacSiByUserId(@Path("userId") int userId);
+
     @GET("api/bac-si")
     Call<List<BacSi>> getAllBacSi();
 
@@ -59,7 +68,7 @@ public interface ApiService {
     Call<List<BacSi>> getBacSiByKhoa(@Path("khoaId") int khoaId);
 
     @POST("api/bac-si")
-    Call<BacSi> createBacSi(@Body BacSi bacSi);
+    Call<BacSi> createBacSi(@Body BacSiDTO bacSi);
 
     // BenhNhan endpoints
     @GET("api/benh-nhan/{userId}")
@@ -67,4 +76,29 @@ public interface ApiService {
 
     @POST("api/benh-nhan")
     Call<BenhNhan> createBenhNhan(@Body BenhNhan benhNhan);
+
+    // LichHen endpoints
+    @POST("api/lich-hen")
+    Call<LichHen> createLichHen(@Body LichHenDTO lichHen);
+
+    @GET("api/lich-hen/benh-nhan/{userId}")
+    Call<List<LichHen>> getLichHenByUserId(@Path("userId") int userId);
+
+    @GET("api/bac-si/lich-kham")
+    Call<List<LichHen>> getLichKham(@Query("bacSiId") int bacSiId, @Query("date") String date);
+
+    @GET("api/lich-hen/{id}")
+    Call<LichHen> getLichHenById(@Path("id") int id);
+
+    // CaKham endpoints
+    @GET("api/ca-kham")
+    Call<List<CaKham>> getAvailableCa(@Query("bacSiId") int bacSiId, @Query("ngay") String ngay);
+
+    // PhongKham endpoints
+    @GET("api/phong-kham/{id}")
+    Call<PhongKham> getPhongKhamById(@Path("id") int id);
+
+    // Payment endpoints
+    @GET("api/payment/create_payment")
+    Call<String> createPaymentUrl(@Query("lichHenId") int lichHenId, @Query("soTien") BigDecimal soTien);
 }

@@ -8,17 +8,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.app_dat_lich_kham_benh.R;
 import com.example.app_dat_lich_kham_benh.api.ApiClient;
 import com.example.app_dat_lich_kham_benh.api.dto.LoginRequestDTO;
+import com.example.app_dat_lich_kham_benh.api.model.BacSi;
 import com.example.app_dat_lich_kham_benh.api.model.User;
 import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.example.app_dat_lich_kham_benh.ui.MainActivity;
 import com.example.app_dat_lich_kham_benh.ui.admin.AdminDashboardActivity;
-import com.example.app_dat_lich_kham_benh.ui.doctor.DoctorDashboardActivity;
+import com.example.app_dat_lich_kham_benh.ui.doctor.DoctorScheduleActivity;
 import com.example.app_dat_lich_kham_benh.util.SessionManager;
 
 import retrofit2.Call;
@@ -42,7 +44,6 @@ public class LoginActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(getApplicationContext());
         apiService = ApiClient.getApiService();
-
         etEmail = findViewById(R.id.email_edittext);
         etPassword = findViewById(R.id.password_edittext);
         btnLogin = findViewById(R.id.login_button);
@@ -71,33 +72,24 @@ public class LoginActivity extends AppCompatActivity {
 
         apiService.login(loginRequest).enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     User user = response.body();
-                    
-                    // --- DÒNG LOG CHẨN ĐOÁN --- 
-                    Log.d(TAG, "Đăng nhập thành công. Vai trò nhận được từ server: '" + user.getRole() + "'");
-
                     sessionManager.createLoginSession(user.getUserId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getRole());
-
                     showToast("Đăng nhập thành công!");
 
-                    Intent intent;
+                    // Phân luồng dựa trên vai trò
                     if ("admin".equalsIgnoreCase(user.getRole())) {
-                        intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                        navigateTo(AdminDashboardActivity.class, -1);
                     } else if ("doctor".equalsIgnoreCase(user.getRole())) {
-                        intent = new Intent(LoginActivity.this, DoctorDashboardActivity.class);
+                        // Cần lấy doctorId trước khi chuyển màn hình
+                        getDoctorIdAndProceed(user.getUserId());
                     } else {
-                        intent = new Intent(LoginActivity.this, MainActivity.class);
+                        navigateTo(MainActivity.class, -1);
                     }
-
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-
                 } else {
                     String errorMessage = "Sai thông tin đăng nhập.";
-                     if (response.code() == 401) { // Unauthorized
+                    if (response.code() == 401) { // Unauthorized
                         errorMessage = "Sai mật khẩu. Vui lòng thử lại.";
                     } else if (response.code() == 404) { // Not Found
                         errorMessage = "Tài khoản không tồn tại.";
@@ -107,11 +99,43 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Log.e(TAG, "Login failed: " + t.getMessage());
                 showToast("Lỗi kết nối. Vui lòng thử lại.");
             }
         });
+    }
+
+    private void getDoctorIdAndProceed(int userId) {
+        apiService.getBacSiByUserId(userId).enqueue(new Callback<BacSi>() {
+            @Override
+            public void onResponse(@NonNull Call<BacSi> call, @NonNull Response<BacSi> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BacSi bacSi = response.body();
+                    // Đã lấy được doctorId, giờ mới chuyển màn hình
+                    navigateTo(DoctorScheduleActivity.class, bacSi.getBacSiId());
+                } else {
+                    Log.e(TAG, "Không thể lấy thông tin bác sĩ cho userId: " + userId);
+                    showToast("Đăng nhập thành công nhưng không thể lấy thông tin bác sĩ.");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<BacSi> call, @NonNull Throwable t) {
+                Log.e(TAG, "API call to get doctor details failed: " + t.getMessage());
+                showToast("Lỗi kết nối khi lấy thông tin bác sĩ.");
+            }
+        });
+    }
+
+    private void navigateTo(Class<?> activityClass, int doctorId) {
+        Intent intent = new Intent(LoginActivity.this, activityClass);
+        if (doctorId != -1) {
+            intent.putExtra("DOCTOR_ID", doctorId);
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void showToast(String message) {

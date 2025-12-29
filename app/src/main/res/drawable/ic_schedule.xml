@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Calendar -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+            M7,2C6.45,2 6,2.45 6,3V4H5
+            C3.9,4 3,4.9 3,6V19
+            C3,20.1 3.9,21 5,21H19
+            C20.1,21 21,20.1 21,19V6
+            C21,4.9 20.1,4 19,4H18V3
+            C18,2.45 17.55,2 17,2
+            C16.45,2 16,2.45 16,3V4H8V3
+            C8,2.45 7.55,2 7,2Z
+            M5,8H19V19H5V8Z"/>
+
+    <!-- Check -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M9.5,14.5
+            L11,16
+            L15,12
+            C15.4,11.6 16,11.6 16.4,12
+            C16.8,12.4 16.8,13 16.4,13.4
+            L11.7,18.1
+            C11.3,18.5 10.7,18.5 10.3,18.1
+            L8.1,15.9
+            C7.7,15.5 7.7,14.9 8.1,14.5
+            C8.5,14.1 9.1,14.1 9.5,14.5Z"/>
+</vector>

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 public class SessionManager {
     private static final String PREF_NAME = "UserSession";
     private static final String KEY_USER_ID = "userId";
+    private static final String KEY_BAC_SI_ID = "bacSiId"; // Thêm key cho bacSiId
     private static final String KEY_FIRST_NAME = "firstName";
     private static final String KEY_LAST_NAME = "lastName";
     private static final String KEY_EMAIL = "email";
@@ -29,13 +30,20 @@ public class SessionManager {
         editor.putString(KEY_ROLE, role);
         editor.apply();
     }
+    public void setBacSiId(int bacSiId) {
+        editor.putInt(KEY_BAC_SI_ID, bacSiId);
+        editor.apply();
+    }
 
     public boolean isLoggedIn() {
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
     }
     
     public int getUserId() {
-        return sharedPreferences.getInt(KEY_USER_ID, -1); // Trả về -1 nếu không tìm thấy
+        return sharedPreferences.getInt(KEY_USER_ID, -1);
+    }
+    public int getBacSiId() {
+        return sharedPreferences.getInt(KEY_BAC_SI_ID, -1);
     }
 
     public String getUserName() {

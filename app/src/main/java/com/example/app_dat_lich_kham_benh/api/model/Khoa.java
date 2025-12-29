@@ -1,8 +1,9 @@
 package com.example.app_dat_lich_kham_benh.api.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class Khoa {
+public class Khoa implements Serializable {
     @SerializedName("khoaId")
     private Integer khoaId;
 
@@ -11,6 +12,9 @@ public class Khoa {
 
     @SerializedName("moTa")
     private String moTa;
+
+    @SerializedName("hinhAnh")
+    private String hinhAnh;
 
     // Getters and Setters
     public Integer getKhoaId() {
@@ -35,5 +39,13 @@ public class Khoa {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
+    }
+
+    public String getHinhAnh() {
+        return hinhAnh;
+    }
+
+    public void setHinhAnh(String hinhAnh) {
+        this.hinhAnh = hinhAnh;
     }
 }

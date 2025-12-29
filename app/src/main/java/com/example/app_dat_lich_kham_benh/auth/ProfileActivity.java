@@ -1,6 +1,7 @@
 package com.example.app_dat_lich_kham_benh.auth;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -133,7 +134,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserProfile() {
-        apiService.getUserById(sessionManager.getUserId()).enqueue(new Callback<User>() {
+        apiService.getUserById((int) sessionManager.getUserId()).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {

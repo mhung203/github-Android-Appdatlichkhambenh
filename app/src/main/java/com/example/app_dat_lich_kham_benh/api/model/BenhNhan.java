@@ -1,8 +1,12 @@
 package com.example.app_dat_lich_kham_benh.api.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class BenhNhan {
+public class BenhNhan implements Serializable {
+    @SerializedName("benhNhanId")
+    private int benhNhanId;
+
     @SerializedName("userId")
     private Integer userId;
 
@@ -20,6 +24,14 @@ public class BenhNhan {
 
     @SerializedName("user")
     private User user;
+
+    public int getBenhNhanId() {
+        return benhNhanId;
+    }
+
+    public void setBenhNhanId(int benhNhanId) {
+        this.benhNhanId = benhNhanId;
+    }
 
     public Integer getUserId() {
         return userId;

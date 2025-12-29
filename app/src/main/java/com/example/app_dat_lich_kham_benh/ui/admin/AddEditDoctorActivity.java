@@ -13,10 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.app_dat_lich_kham_benh.R;
 import com.example.app_dat_lich_kham_benh.api.ApiClient;
+import com.example.app_dat_lich_kham_benh.api.dto.BacSiDTO;
 import com.example.app_dat_lich_kham_benh.api.model.BacSi;
 import com.example.app_dat_lich_kham_benh.api.model.Khoa;
 import com.example.app_dat_lich_kham_benh.api.model.User;
 import com.example.app_dat_lich_kham_benh.api.service.ApiService;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -30,9 +32,10 @@ public class AddEditDoctorActivity extends AppCompatActivity {
 
     private static final String TAG = "AddEditDoctorActivity";
 
-    private TextInputEditText etFirstName, etLastName, etEmail, etPassword;
+    private TextInputEditText etFirstName, etLastName, etEmail, etPassword, etDegree, etExperience;
     private AutoCompleteTextView actvSpecialty;
     private Button btnSave;
+    private MaterialToolbar toolbar;
 
     private boolean isEditMode = false;
     private int doctorIdToEdit = -1;
@@ -50,21 +53,26 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         etLastName = findViewById(R.id.et_doctor_lastname);
         etEmail = findViewById(R.id.et_doctor_email);
         etPassword = findViewById(R.id.et_doctor_password);
+        etDegree = findViewById(R.id.et_doctor_degree);
+        etExperience = findViewById(R.id.et_doctor_experience);
         actvSpecialty = findViewById(R.id.actv_doctor_specialty);
         btnSave = findViewById(R.id.btn_save_doctor);
+        toolbar = findViewById(R.id.toolbar_add_edit_doctor);
         loadKhoaData();
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("DOCTOR_ID")) {
             isEditMode = true;
             doctorIdToEdit = intent.getIntExtra("DOCTOR_ID", -1);
-            setTitle("Chỉnh sửa Bác sĩ");
+            toolbar.setTitle("Chỉnh sửa Bác sĩ");
             btnSave.setText("Cập nhật thông tin");
             etPassword.setHint("Để trống nếu không đổi mật khẩu");
 
             loadDoctorDetails(doctorIdToEdit);
         } else {
-            setTitle("Thêm Bác sĩ mới");
+            toolbar.setTitle("Thêm Bác sĩ mới");
         }
 
         btnSave.setOnClickListener(v -> saveDoctor());
@@ -115,6 +123,8 @@ public class AddEditDoctorActivity extends AppCompatActivity {
                         etLastName.setText(doctor.getUser().getLastname());
                         etEmail.setText(doctor.getUser().getEmail());
                     }
+                    etDegree.setText(doctor.getBangCap());
+                    etExperience.setText(doctor.getKinhNghiem());
                     if (doctor.getKhoa() != null) {
                         actvSpecialty.setText(doctor.getKhoa().getTenKhoa(), false);
                     }
@@ -135,9 +145,11 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         String lastName = etLastName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+        String degree = etDegree.getText().toString().trim();
+        String experience = etExperience.getText().toString().trim();
         String specialtyName = actvSpecialty.getText().toString().trim();
 
-        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || specialtyName.isEmpty()) {
+        if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || specialtyName.isEmpty() || degree.isEmpty() || experience.isEmpty()) {
             showToast("Vui lòng nhập đầy đủ thông tin.");
             return;
         }
@@ -175,7 +187,7 @@ public class AddEditDoctorActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         // Step 3: If user creation is successful, create the doctor profile
                         User createdUser = response.body();
-                        createDoctorProfile(createdUser, selectedKhoa);
+                        createDoctorProfile(createdUser, selectedKhoa, degree, experience);
                     } else {
                         showToast("Tạo tài khoản thất bại. Email có thể đã tồn tại.");
                         Log.e(TAG, "User creation failed. Code: " + response.code());
@@ -191,17 +203,12 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         }
     }
 
-    private void createDoctorProfile(User createdUser, Khoa selectedKhoa) {
-        // Link user and khoa by their IDs
-        User userToLink = new User();
-        userToLink.setUserId(createdUser.getUserId());
-
-        Khoa khoaToLink = new Khoa();
-        khoaToLink.setKhoaId(selectedKhoa.getKhoaId());
-
-        BacSi newDoctor = new BacSi();
-        newDoctor.setUser(userToLink);
-        newDoctor.setKhoa(khoaToLink);
+    private void createDoctorProfile(User createdUser, Khoa selectedKhoa, String degree, String experience) {
+        BacSiDTO newDoctor = new BacSiDTO();
+        newDoctor.setUserId(createdUser.getUserId());
+        newDoctor.setKhoaId(selectedKhoa.getKhoaId());
+        newDoctor.setBangCap(degree);
+        newDoctor.setKinhNghiem(experience);
 
         // Step 4: Call API to create the doctor profile
         apiService.createBacSi(newDoctor).enqueue(new Callback<BacSi>() {
@@ -212,7 +219,12 @@ public class AddEditDoctorActivity extends AppCompatActivity {
                     finish(); // Go back to the doctor list
                 } else {
                     showToast("Tạo hồ sơ bác sĩ thất bại.");
-                    Log.e(TAG, "Doctor profile creation failed. Code: " + response.code());
+                    Log.e(TAG, "Doctor profile creation failed. Code: " + response.code() + " | Message: " + response.message());
+                    try {
+                        Log.e(TAG, "Error Body: " + response.errorBody().string());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing error body", e);
+                    }
                 }
             }
 

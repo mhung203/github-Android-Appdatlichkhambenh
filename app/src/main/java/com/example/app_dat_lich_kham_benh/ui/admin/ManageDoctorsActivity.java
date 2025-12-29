@@ -18,6 +18,7 @@ import com.example.app_dat_lich_kham_benh.api.model.BacSi;
 import com.example.app_dat_lich_kham_benh.api.model.User;
 import com.example.app_dat_lich_kham_benh.api.service.ApiService;
 import com.example.app_dat_lich_kham_benh.model.Doctor;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
     private DoctorAdapter doctorAdapter;
     private List<Doctor> doctorList = new ArrayList<>();
     private ApiService apiService;
+    private MaterialToolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
         apiService = ApiClient.getApiService();
         recyclerViewDoctors = findViewById(R.id.recycler_view_doctors);
         fabAddDoctor = findViewById(R.id.fab_add_doctor);
+        toolbar = findViewById(R.id.toolbar);
 
         setupRecyclerView();
 
@@ -52,6 +55,8 @@ public class ManageDoctorsActivity extends AppCompatActivity implements DoctorAd
             Intent intent = new Intent(ManageDoctorsActivity.this, AddEditDoctorActivity.class);
             startActivity(intent);
         });
+
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     @Override

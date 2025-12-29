@@ -110,6 +110,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     showToast("Mã OTP đã được gửi đến email của bạn.");
                     resetPasswordSection.setVisibility(View.VISIBLE);
+                    btnResetPassword.setVisibility(View.VISIBLE);
                 });
             } catch (MessagingException e) {
                 Log.e(TAG, "MessagingException: " + e.getMessage());

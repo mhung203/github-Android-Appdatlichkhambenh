@@ -21,7 +21,7 @@ public class AccountFragment extends Fragment {
     private SessionManager sessionManager;
     private LinearLayout loggedOutView, loggedInView;
     private Button goToLoginButton;
-    private TextView logoutButton, updateProfileButton;
+    private TextView logoutButton, updateProfileButton, appointmentHistoryButton;
     private TextView userNameTextView, userEmailTextView;
 
     @Nullable
@@ -38,6 +38,7 @@ public class AccountFragment extends Fragment {
         userNameTextView = view.findViewById(R.id.account_user_name);
         userEmailTextView = view.findViewById(R.id.account_user_email);
         updateProfileButton = view.findViewById(R.id.update_profile_button);
+        appointmentHistoryButton = view.findViewById(R.id.appointment_history_button);
 
         // Gán sự kiện
         goToLoginButton.setOnClickListener(v -> {
@@ -54,6 +55,11 @@ public class AccountFragment extends Fragment {
 
         updateProfileButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        appointmentHistoryButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), AppointmentHistoryActivity.class);
             startActivity(intent);
         });
 

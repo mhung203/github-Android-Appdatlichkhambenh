@@ -1,9 +1,10 @@
 package com.example.app_dat_lich_kham_benh.api.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class BacSi {
-    @SerializedName("bacSiId")
+public class BacSi implements Serializable {
+    @SerializedName(value = "bacSiId", alternate = {"id"})
     private Integer bacSiId;
 
     @SerializedName("bangCap")
@@ -12,11 +13,16 @@ public class BacSi {
     @SerializedName("kinhNghiem")
     private Integer kinhNghiem;
 
+    @SerializedName("anhDaiDien")
+    private String anhDaiDien;
+
     @SerializedName("user")
     private User user;
 
     @SerializedName("khoa")
     private Khoa khoa;
+    @SerializedName("phongKham")
+    private PhongKham phongKham;
 
     public Integer getBacSiId() {
         return bacSiId;
@@ -42,6 +48,14 @@ public class BacSi {
         this.kinhNghiem = kinhNghiem;
     }
 
+    public String getAnhDaiDien() {
+        return anhDaiDien;
+    }
+
+    public void setAnhDaiDien(String anhDaiDien) {
+        this.anhDaiDien = anhDaiDien;
+    }
+
     public User getUser() {
         return user;
     }
@@ -57,4 +71,11 @@ public class BacSi {
     public void setKhoa(Khoa khoa) {
         this.khoa = khoa;
     }
+    public void setPhongKham(PhongKham phongKham) {
+        this.phongKham = phongKham;
+    }
+    public PhongKham getPhongKham() {
+        return phongKham;
+    }
+
 }
