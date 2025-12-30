@@ -172,20 +172,16 @@ public class AddEditDoctorActivity extends AppCompatActivity {
                 return;
             }
 
-            // Step 1: Create the User object
             User newUserAccount = new User();
             newUserAccount.setFirstname(firstName);
             newUserAccount.setLastname(lastName);
             newUserAccount.setEmail(email);
             newUserAccount.setPassword(password);
             newUserAccount.setRole("doctor");
-
-            // Step 2: Call API to create the user first
             apiService.createUser(newUserAccount).enqueue(new Callback<User>() {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        // Step 3: If user creation is successful, create the doctor profile
                         User createdUser = response.body();
                         createDoctorProfile(createdUser, selectedKhoa, degree, experience);
                     } else {
@@ -209,14 +205,12 @@ public class AddEditDoctorActivity extends AppCompatActivity {
         newDoctor.setKhoaId(selectedKhoa.getKhoaId());
         newDoctor.setBangCap(degree);
         newDoctor.setKinhNghiem(experience);
-
-        // Step 4: Call API to create the doctor profile
         apiService.createBacSi(newDoctor).enqueue(new Callback<BacSi>() {
             @Override
             public void onResponse(Call<BacSi> call, Response<BacSi> response) {
                 if (response.isSuccessful()) {
                     showToast("Thêm bác sĩ thành công!");
-                    finish(); // Go back to the doctor list
+                    finish();
                 } else {
                     showToast("Tạo hồ sơ bác sĩ thất bại.");
                     Log.e(TAG, "Doctor profile creation failed. Code: " + response.code() + " | Message: " + response.message());

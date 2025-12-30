@@ -79,8 +79,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         btnSendOtp.setEnabled(false);
         showToast("Đang gửi mã OTP...");
-        
-        // Note: Sending OTP from the client is not secure and should be handled by the backend.
         new Thread(() -> {
             try {
                 String otp = String.format("%06d", new java.util.Random().nextInt(999999));
@@ -114,7 +112,6 @@ public class RegisterActivity extends AppCompatActivity {
         newUser.setFirstname(firstName);
         newUser.setLastname(lastName);
         newUser.setEmail(email);
-        // Send plain password. Hashing should be done on the backend.
         newUser.setPassword(password);
         newUser.setRole("Bệnh nhân");
 
@@ -128,7 +125,6 @@ public class RegisterActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    // Improved error handling
                     String errorMessage = "Đăng ký thất bại. Email có thể đã tồn tại.";
                     if (response.errorBody() != null) {
                         try {

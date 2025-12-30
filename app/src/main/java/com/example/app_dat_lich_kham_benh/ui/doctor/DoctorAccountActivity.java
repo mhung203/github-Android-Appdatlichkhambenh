@@ -28,18 +28,14 @@ public class DoctorAccountActivity extends AppCompatActivity {
         updateProfileButton = findViewById(R.id.update_doctor_profile_button);
         logoutButton = findViewById(R.id.doctor_logout_button);
 
-        // Load doctor info
         if (sessionManager.isLoggedIn()) {
             doctorName.setText(sessionManager.getUserName());
             doctorEmail.setText(sessionManager.getUserEmail());
         } else {
-            // If not logged in, redirect to LoginActivity
             redirectToLogin();
         }
 
-        // Set click listeners
         updateProfileButton.setOnClickListener(v -> {
-            // Assuming ProfileActivity can be used to edit doctor's profile
             Intent intent = new Intent(DoctorAccountActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
@@ -53,7 +49,6 @@ public class DoctorAccountActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data when returning to the activity
         if (sessionManager.isLoggedIn()) {
             doctorName.setText(sessionManager.getUserName());
             doctorEmail.setText(sessionManager.getUserEmail());

@@ -1,14 +1,12 @@
 package com.example.app_dat_lich_kham_benh.api.dto;
 
 import com.google.gson.annotations.SerializedName;
-
-// This DTO is structured to match the backend's LichHenController expectations
 public class LichHenDTO {
 
     @SerializedName("userId")
     private int userId;
 
-    @SerializedName("bacSiId") // Corrected from idBacSi
+    @SerializedName("bacSiId")
     private int bacSiId;
 
     @SerializedName("idCa")
@@ -17,7 +15,7 @@ public class LichHenDTO {
     @SerializedName("idPhong")
     private int idPhong;
 
-    @SerializedName("ngayKham") // Corrected from ngay
+    @SerializedName("ngayKham")
     private String ngayKham;
 
     @SerializedName("timeStart")

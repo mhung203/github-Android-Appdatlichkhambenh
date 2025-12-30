@@ -112,7 +112,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<BacSi> call, @NonNull Response<BacSi> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     BacSi bacSi = response.body();
-                    // Đã lấy được doctorId, giờ mới chuyển màn hình
+                    sessionManager.setBacSiId(bacSi.getBacSiId());
                     navigateTo(DoctorScheduleActivity.class, bacSi.getBacSiId());
                 } else {
                     Log.e(TAG, "Không thể lấy thông tin bác sĩ cho userId: " + userId);

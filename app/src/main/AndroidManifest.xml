@@ -65,6 +65,21 @@
         <activity
             android:name=".ui.doctor.DoctorAccountActivity"
             android:exported="false" />
+        <activity android:name=".ui.InboxActivity"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.ChatActivity"
+            android:exported="false" />
+        <activity android:name=".ui.NotificationActivity"
+            android:exported="false" />
+        <activity android:name=".ui.admin.ManageScheduleActivity" />
+        <activity android:name=".ui.admin.ManageDepartmentActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

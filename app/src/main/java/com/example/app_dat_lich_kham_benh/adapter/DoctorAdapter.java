@@ -56,10 +56,7 @@ public class DoctorAdapter extends RecyclerView.Adapter<DoctorAdapter.DoctorView
 
         public void bind(final Doctor doctor, final OnItemClickListener listener) {
             tvDoctorName.setText(doctor.getFullName());
-            // We are not saving specialty to the User table yet, so this is a placeholder.
-            // We'll need to adjust the database schema later.
-            tvDoctorSpecialty.setText(doctor.getSpecialty()); 
-
+            tvDoctorSpecialty.setText(doctor.getSpecialty());
             btnEdit.setOnClickListener(v -> listener.onEditClick(doctor));
             btnDelete.setOnClickListener(v -> listener.onDeleteClick(doctor));
         }

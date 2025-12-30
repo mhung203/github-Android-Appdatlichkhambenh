@@ -24,8 +24,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // Lấy mật khẩu và xóa tất cả các dấu ngoặc kép thừa
         val dbPassword = (localProperties.getProperty("db.password") ?: "").replace("\"", "")
         buildConfigField("String", "DB_PASSWORD", "\"$dbPassword\"")
 
@@ -75,6 +73,11 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
+    // Stomp and RxJava for WebSocket
+    implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -1,6 +1,7 @@
 package com.example.app_dat_lich_kham_benh.api.service;
 
 import com.example.app_dat_lich_kham_benh.api.dto.BacSiDTO;
+import com.example.app_dat_lich_kham_benh.api.dto.ChatContactDTO;
 import com.example.app_dat_lich_kham_benh.api.dto.LichHenDTO;
 import com.example.app_dat_lich_kham_benh.api.dto.LoginRequestDTO;
 import com.example.app_dat_lich_kham_benh.api.model.BacSi;
@@ -9,6 +10,9 @@ import com.example.app_dat_lich_kham_benh.api.model.CaKham;
 import com.example.app_dat_lich_kham_benh.api.model.Khoa;
 import com.example.app_dat_lich_kham_benh.api.model.LichHen;
 import com.example.app_dat_lich_kham_benh.api.model.PhongKham;
+import com.example.app_dat_lich_kham_benh.api.model.ThongBao;
+import com.example.app_dat_lich_kham_benh.api.model.TinNhan;
+import com.example.app_dat_lich_kham_benh.api.model.TinTuc;
 import com.example.app_dat_lich_kham_benh.api.model.User;
 
 import java.math.BigDecimal;
@@ -54,7 +58,6 @@ public interface ApiService {
     @GET("api/khoa/search")
     Call<List<Khoa>> searchKhoa(@Query("q") String query);
 
-    // BacSi endpoints
     @GET("api/bac-si/{id}")
     Call<BacSi> getBacSiById(@Path("id") int id);
 
@@ -70,14 +73,12 @@ public interface ApiService {
     @POST("api/bac-si")
     Call<BacSi> createBacSi(@Body BacSiDTO bacSi);
 
-    // BenhNhan endpoints
     @GET("api/benh-nhan/{userId}")
     Call<BenhNhan> getBenhNhanByUserId(@Path("userId") int userId);
 
     @POST("api/benh-nhan")
     Call<BenhNhan> createBenhNhan(@Body BenhNhan benhNhan);
 
-    // LichHen endpoints
     @POST("api/lich-hen")
     Call<LichHen> createLichHen(@Body LichHenDTO lichHen);
 
@@ -90,15 +91,35 @@ public interface ApiService {
     @GET("api/lich-hen/{id}")
     Call<LichHen> getLichHenById(@Path("id") int id);
 
-    // CaKham endpoints
     @GET("api/ca-kham")
     Call<List<CaKham>> getAvailableCa(@Query("bacSiId") int bacSiId, @Query("ngay") String ngay);
 
-    // PhongKham endpoints
     @GET("api/phong-kham/{id}")
     Call<PhongKham> getPhongKhamById(@Path("id") int id);
 
-    // Payment endpoints
     @GET("api/payment/create_payment")
     Call<String> createPaymentUrl(@Query("lichHenId") int lichHenId, @Query("soTien") BigDecimal soTien);
+    @GET("api/chat/contacts/{myId}")
+    Call<List<ChatContactDTO>> getChatContacts(@Path("myId") int myId);
+    @GET("api/chat/all-doctors")
+    Call<List<ChatContactDTO>> getAllDoctors();
+    @GET("api/chat/all-patients")
+    Call<List<ChatContactDTO>> getAllPatients();
+    @GET("api/messages/{senderId}/{recipientId}")
+    Call<List<TinNhan>> getChatHistory(@Path("senderId") int senderId, @Path("recipientId") int recipientId);
+    @GET("api/news/latest")
+    Call<List<TinTuc>> getLatestNews();
+    @GET("api/notifications/{userId}")
+    Call<List<ThongBao>> getNotifications(@Path("userId") int userId);
+    @PUT("api/notifications/read/{id}")
+    Call<Void> markAsRead(@Path("id") int id);
+    @GET("api/lich-hen/admin/all")
+    Call<List<LichHen>> getLichHenAdmin(@Query("date") String date);
+    @PUT("api/lich-hen/huy/{id}")
+    Call<LichHen> huyLichHen(@Path("id") int id);
+    @POST("api/khoa")
+    Call<Khoa> createKhoa(@Body Khoa khoa);
+
+    @DELETE("api/khoa/{id}")
+    Call<Void> deleteKhoa(@Path("id") int id);
 }

@@ -56,14 +56,13 @@ public class PaymentActivity extends AppCompatActivity {
                     String responseCode = uri.getQueryParameter("vnp_ResponseCode");
 
                     if ("00".equals(responseCode)) {
-                        // Go to success screen
                         Intent intent = new Intent(PaymentActivity.this, PaymentSuccessActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finish();
                     } else {
                         Toast.makeText(PaymentActivity.this, "Thanh toán đã bị hủy hoặc thất bại.", Toast.LENGTH_LONG).show();
-                        finish(); // Close and go back to confirmation screen
+                        finish();
                     }
                 }
             }
@@ -79,7 +78,6 @@ public class PaymentActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Just close the activity, go back to confirmation screen
         super.onBackPressed();
     }
 }

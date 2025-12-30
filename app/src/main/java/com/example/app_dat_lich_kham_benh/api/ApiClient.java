@@ -7,8 +7,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiClient {
-
-    // Use 10.0.2.2 to connect to host machine's localhost from Android emulator
     private static final String BASE_URL = "http://10.0.2.2:8081/";
 
     private static Retrofit retrofit = null;

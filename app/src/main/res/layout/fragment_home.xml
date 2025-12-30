@@ -5,102 +5,138 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".ui.MainActivity">
+    android:background="#F5F5F5"> <com.google.android.material.appbar.AppBarLayout
+    android:id="@+id/appBarLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    android:background="#2196F3"
+    android:fitsSystemWindows="true">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.appbar.CollapsingToolbarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:background="#03A9F4"
+        app:layout_scrollFlags="scroll|exitUntilCollapsed"
+        app:contentScrim="#2196F3"
         android:fitsSystemWindows="true">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginStart="48dp"
-            app:expandedTitleMarginEnd="64dp"
-            android:fitsSystemWindows="true">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="24dp"
+            app:layout_collapseMode="parallax">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                app:layout_collapseMode="parallax">
+                android:layout_marginBottom="20dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
-
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cvAvatar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="0dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true">
                     <ImageView
                         android:id="@+id/user_icon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@android:color/white"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_default_avatar"
+                        android:scaleType="centerCrop"/>
+                </androidx.cardview.widget.CardView>
 
-                    <LinearLayout
-                        android:id="@+id/user_info_layout"
+                <LinearLayout
+                    android:id="@+id/user_info_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_toEndOf="@id/cvAvatar"
+                    android:layout_toStartOf="@id/notification_icon"
+                    android:layout_marginStart="12dp"
+                    android:layout_centerVertical="true">
+
+                    <TextView
+                        android:id="@+id/greeting_textview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_toEndOf="@id/user_icon"
-                        android:layout_marginStart="16dp"
-                        android:layout_centerVertical="true">
-                        
-                        <TextView
-                            android:id="@+id/greeting_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Buổi tối an lành!"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"/>
-                            
-                        <TextView
-                            android:id="@+id/user_name_textview"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Đăng ký / Đăng nhập"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold"
-                            android:textSize="16sp"/>
+                        android:text="Buổi tối an lành,"
+                        android:textColor="#E0E0E0"
+                        android:textSize="13sp"/>
 
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/user_name_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Khách"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:ellipsize="end"
+                        android:maxLines="1"/>
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/notification_icon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_notifications"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:tint="@android:color/white"/>
+
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:cardCornerRadius="25dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@android:color/white"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
 
                     <ImageView
-                        android:id="@+id/notification_icon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_notifications"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@android:color/white"/>
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_search"
+                        app:tint="#757575"/>
 
-                </RelativeLayout>
+                    <EditText
+                        android:id="@+id/editTextSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:hint="Tìm bác sĩ, chuyên khoa..."
+                        android:paddingStart="12dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#9E9E9E"
+                        android:textSize="14sp"
+                        android:maxLines="1"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
-                <EditText
-                    android:id="@+id/editTextSearch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/search_bar_background"
-                    android:drawableStart="@android:drawable/ic_menu_search"
-                    android:drawablePadding="8dp"
-                    android:hint="Tên bác sĩ, triệu chứng bệnh, chuyên khoa..."
-                    android:padding="12dp"
-                    android:textColorHint="#9E9E9E"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -108,49 +144,195 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/banner_recyclerview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            android:orientation="vertical"
+            android:paddingBottom="80dp"> <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/banner_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Chuyên Khoa"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="10dp"/>
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chuyên Khoa"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"/>
+
+                    <TextView
+                        android:id="@+id/tvViewAllSpecialties"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xem tất cả"
+                        android:textColor="#2196F3"
+                        android:textSize="14sp"
+                        android:layout_alignParentEnd="true"
+                        android:background="?attr/selectableItemBackground"/>
+                </RelativeLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewSpecialties"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bác sĩ nổi bật"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="10dp" />
+                    android:clipToPadding="false"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bác sĩ nổi bật"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"/>
+
+                    <TextView
+                        android:id="@+id/tvViewAllDoctors"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xem thêm"
+                        android:textColor="#2196F3"
+                        android:textSize="14sp"
+                        android:layout_alignParentEnd="true"
+                        android:background="?attr/selectableItemBackground"/>
+                </RelativeLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewDoctors"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="8dp"/>
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tin tức y tế mới nhất"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#000000"/>
+
+                </RelativeLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rcvNews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="8dp"/>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardNotificationMini"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:background="#F5F5F5"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Thông báo mới"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/tvClosePopup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đóng"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:padding="4dp"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvNotificationMini"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="300dp"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvViewAllNoti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Xem tất cả thông báo"
+                android:gravity="center"
+                android:padding="12dp"
+                android:textColor="#2196F3"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -40,7 +40,6 @@ public class AccountFragment extends Fragment {
         updateProfileButton = view.findViewById(R.id.update_profile_button);
         appointmentHistoryButton = view.findViewById(R.id.appointment_history_button);
 
-        // Gán sự kiện
         goToLoginButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             startActivity(intent);

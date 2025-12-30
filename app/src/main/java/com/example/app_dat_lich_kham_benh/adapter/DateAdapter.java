@@ -21,10 +21,10 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.DateViewHolder
 
     private List<Calendar> dateList;
     private Context context;
-    private int selectedPosition = 0; // Default to today
+    private int selectedPosition = 0;
     private OnDateClickListener listener;
     private SimpleDateFormat dayOfWeekFormat = new SimpleDateFormat("EEE", new Locale("vi", "VN")); // e.g., "T2"
-    private SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("d", Locale.getDefault()); // e.g., "29"
+    private SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("d", Locale.getDefault());
 
     public interface OnDateClickListener {
         void onDateClick(Calendar date);
@@ -63,7 +63,6 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.DateViewHolder
 
         holder.itemView.setSelected(selectedPosition == position);
 
-        // Change text color for selected item
         if (selectedPosition == position) {
             holder.tvDayOfWeek.setTextColor(Color.WHITE);
             holder.tvDayOfMonth.setTextColor(Color.WHITE);

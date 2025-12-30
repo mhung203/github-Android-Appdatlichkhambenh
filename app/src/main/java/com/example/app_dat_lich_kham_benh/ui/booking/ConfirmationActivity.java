@@ -42,7 +42,6 @@ public class ConfirmationActivity extends AppCompatActivity {
 
         apiService = ApiClient.getApiService();
 
-        // Ánh xạ View
         toolbar = findViewById(R.id.toolbar_confirmation);
         tvDoctorName = findViewById(R.id.tv_doctor_name);
         tvSpecialtyName = findViewById(R.id.tv_specialty_name);
@@ -54,14 +53,12 @@ public class ConfirmationActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tv_appointment_status);
         btnConfirmPayment = findViewById(R.id.btn_confirm_payment);
 
-        // Cài đặt Toolbar
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Lấy dữ liệu lịch hẹn từ Intent
         currentLichHen = (LichHen) getIntent().getSerializableExtra("LICH_HEN_DATA");
 
         if (currentLichHen != null) {

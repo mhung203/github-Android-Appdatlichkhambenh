@@ -70,7 +70,7 @@ public class BookingActivity extends AppCompatActivity implements DateAdapter.On
         apiService = ApiClient.getApiService();
         sessionManager = new SessionManager(this);
 
-        // Ánh xạ View
+
         toolbar = findViewById(R.id.toolbar_booking);
         actvSpecialty = findViewById(R.id.actv_specialty);
         actvDoctor = findViewById(R.id.actv_doctor);
@@ -79,7 +79,7 @@ public class BookingActivity extends AppCompatActivity implements DateAdapter.On
         etReason = findViewById(R.id.et_reason);
         btnBookAppointment = findViewById(R.id.btn_book_appointment);
 
-        // Cài đặt Toolbar
+
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         if (getSupportActionBar() != null) {
@@ -89,7 +89,7 @@ public class BookingActivity extends AppCompatActivity implements DateAdapter.On
         setupDatesRecyclerView();
         loadSpecialties();
 
-        // Lắng nghe sự kiện
+
         actvSpecialty.setOnItemClickListener((parent, view, position, id) -> {
             selectedKhoa = khoaList.get(position);
             resetDoctorAndTimeSlot();
@@ -232,8 +232,8 @@ public class BookingActivity extends AppCompatActivity implements DateAdapter.On
         lichHenDTO.setTimeStart(selectedCa.getTimeStart());
         lichHenDTO.setTimeEnd(selectedCa.getTimeEnd());
         lichHenDTO.setLyDoKham(reason);
-        lichHenDTO.setIdPhong(1); // Default value
-        lichHenDTO.setChiPhi(150000.0); // Default value
+        lichHenDTO.setIdPhong(1);
+        lichHenDTO.setChiPhi(150000.0);
 
         Log.d(TAG, "Gửi yêu cầu đặt lịch: " + new Gson().toJson(lichHenDTO));
 
@@ -247,7 +247,7 @@ public class BookingActivity extends AppCompatActivity implements DateAdapter.On
                     intent.putExtra("LICH_HEN_DATA", response.body());
                     startActivity(intent);
 
-                    finish(); // Đóng màn hình đặt lịch
+                    finish();
                 } else {
                     String errorBody = "";
                     try {
